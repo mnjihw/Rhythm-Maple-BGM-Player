@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rhythm_Maple_BGM_Player
 {
-    class PlayListClass
+    class BGMPlayList
     {
         public ObservableCollection<BGMListItem> Items { get; } = new ObservableCollection<BGMListItem>();
         private int currentIndex = 0;
@@ -20,8 +20,7 @@ namespace Rhythm_Maple_BGM_Player
                     new Exception("index range wrong");
                 currentIndex = value;
             }
-        }
-
+        } 
         public BGMListItem this[int index]
         {
             get => Items[index];

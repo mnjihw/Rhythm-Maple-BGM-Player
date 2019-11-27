@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rhythm_Maple_BGM_Player"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:smtx="clr-namespace:ShowMeTheXAML;assembly=ShowMeTheXAML"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
@@ -50,8 +49,8 @@
         </EventTrigger>
     </Window.Triggers>
 
-
     <Grid Background="LightSteelBlue">
+        
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
@@ -65,7 +64,7 @@
             <ColumnDefinition x:Name="collapsedGrid" Width="0"/>
         </Grid.ColumnDefinitions>
 
-       
+        
         <TextBlock x:Name="titleBarTextBlock" Grid.Row="0" Grid.ColumnSpan="2" Margin="0, 0, 15, 0" Foreground="Navy" Text="Rhythm Maple BGM Player" VerticalAlignment="Center" TextAlignment="Center" FontSize="16"/>
         <materialDesign:PopupBox x:Name="menuPopupBox" Grid.Row="0" Grid.Column="0" PlacementMode="BottomAndAlignLeftEdges" StaysOpen="True" >
             <StackPanel Width="160">
@@ -91,6 +90,7 @@
                 </StackPanel>
             </materialDesign:PopupBox>
         </StackPanel>
+        
         <StackPanel Grid.Row="1" Grid.Column="0">
             <ToggleButton Margin="4, 0" Foreground="Navy" HorizontalAlignment="Right" x:Name="menuToggleButton" Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
             <ListView x:Name="listView1" Height="310" ScrollViewer.HorizontalScrollBarVisibility="Auto" Foreground="Black" MouseDoubleClick="ListView1_MouseDoubleClick" KeyDown="ListView1_KeyDown">
@@ -140,13 +140,13 @@
             <materialDesign:PackIcon Width="25" Height="25" Kind="PlaylistRemove"/>     
         </Button>
         <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
-            <Button Margin="10, 0, 5, 0" x:Name="previousButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PreviousOrNextButton_Click" >
+            <Button IsEnabled="False" Margin="10, 0, 5, 0" x:Name="previousButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PreviousOrNextButton_Click" >
                 <materialDesign:PackIcon Width="25" Height="25" Kind="PreviousTitle"/>
             </Button>
-            <Button Margin="5, 0" x:Name="playPauseButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PlayPauseButton_Click" >
+            <Button IsEnabled="False" Margin="5, 0" x:Name="playPauseButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PlayPauseButton_Click" >
                 <materialDesign:PackIcon Width="25" Height="25" x:Name="playPauseIcon" Kind="Play"/>
             </Button>
-            <Button Margin="5, 0" x:Name="nextButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PreviousOrNextButton_Click" >
+            <Button IsEnabled="False" Margin="5, 0" x:Name="nextButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PreviousOrNextButton_Click" >
                 <materialDesign:PackIcon Width="25" Height="25" Kind="NextTitle"/>
             </Button>
             <Separator Width="5" Background="Transparent"/>
@@ -169,6 +169,7 @@
         <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal">
             <TextBox x:Name="searchTextBox" materialDesign:HintAssist.Hint="검색" Width="257" Height="35" Style="{StaticResource MaterialDesignFloatingHintTextBox}" KeyUp="SearchTextBox_KeyUp" TextChanged="SearchTextBox_TextChanged"/>
         </StackPanel>
-        
+        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Grid.Row="1" x:Name="progressBar" IsIndeterminate="True" Width="100" VerticalAlignment="Center"/>
+
     </Grid>
 </Window>

@@ -19,6 +19,8 @@ using System.Xml;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Wz;
 using System.Runtime.InteropServices;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 namespace Rhythm_Maple_BGM_Player
 {
@@ -27,7 +29,7 @@ namespace Rhythm_Maple_BGM_Player
         public static WzInformationManager InfoManager = new WzInformationManager();
         private WzMp3Streamer Player { get; }
         private DispatcherTimer SliderTimer { get; } = new DispatcherTimer();
-        private PlayListClass PlayList { get; } = new PlayListClass();
+        private BGMPlayList PlayList { get; } = new BGMPlayList();
         private bool PlaysRandomly { get; set; } = true;
         private readonly Random random = new Random();
         public bool RepeatsAll { get; set; } = true;
@@ -38,7 +40,6 @@ namespace Rhythm_Maple_BGM_Player
         private Cursor MouseHoverDownCursor { get; }
         private Cursor MouseHoverUpCursor { get; }
         private bool IsCursorOverCommonControl { get; set; }
-        
 
         private bool IsDragging { get; set; }
        
@@ -47,11 +48,33 @@ namespace Rhythm_Maple_BGM_Player
             RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             InitializeComponent();
             Player = WzMp3Streamer.Instance;
+            PlayList.Items.CollectionChanged += (sender, e) =>
+            {
+                switch((sender as ObservableCollection<BGMListItem>).Count)
+                {
+                    case 0:
+                        previousButton.IsEnabled = false;
+                        playPauseButton.IsEnabled = false;
+                        nextButton.IsEnabled = false;
+                        break;
+                    case 1:
+                        previousButton.IsEnabled = false;
+                        playPauseButton.IsEnabled = true;
+                        nextButton.IsEnabled = false;
+                        break;
+                    default:
+                        previousButton.IsEnabled = true;
+                        playPauseButton.IsEnabled = true;
+                        nextButton.IsEnabled = true;
+                        break;
+                }
+                
+            };
 
-            MouseDownCursor = CursorHelper.CreateCursor(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/Images/mousedown.png")).Stream), 1, 1);
-            MouseUpCursor = CursorHelper.CreateCursor(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/Images/mouseup.png")).Stream), 1, 1);
-            MouseHoverDownCursor = CursorHelper.CreateCursor(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/Images/mousehoverdown.png")).Stream), 1, 1);
-            MouseHoverUpCursor = CursorHelper.CreateCursor(new Bitmap(Application.GetResourceStream(new Uri("pack://application:,,,/Images/mousehoverup.png")).Stream), 1, 1);
+            MouseDownCursor = CursorHelper.CreateCursor(new Bitmap(App.GetResourceStream(new Uri("pack://application:,,,/Images/mousedown.png")).Stream), 1, 1);
+            MouseUpCursor = CursorHelper.CreateCursor(new Bitmap(App.GetResourceStream(new Uri("pack://application:,,,/Images/mouseup.png")).Stream), 1, 1);
+            MouseHoverDownCursor = CursorHelper.CreateCursor(new Bitmap(App.GetResourceStream(new Uri("pack://application:,,,/Images/mousehoverdown.png")).Stream), 1, 1);
+            MouseHoverUpCursor = CursorHelper.CreateCursor(new Bitmap(App.GetResourceStream(new Uri("pack://application:,,,/Images/mousehoverup.png")).Stream), 1, 1);
 
 
         }
@@ -94,30 +117,31 @@ namespace Rhythm_Maple_BGM_Player
                 if (path == null)
                 {
                     MessageBox.Show($"메이플이 설치돼 있지 않습니다.{Environment.NewLine}본 플레이어는 메이플의 Sound.wz 파일을 읽는 방식이어서 메이플이 설치돼 있어야 사용할 수 있습니다.{Environment.NewLine}해당 파일이 있으시면 선택해주세요.");
+                    App.Current.Shutdown();
                     return;
                 }
+                
                 WzFileManager wzManager = new WzFileManager(path, MapleLib.WzLib.WzMapleVersion.BMS);
 
                 wzManager.LoadWzFile("sound");
                 wzManager.ExtractSoundFile();
             });
-
+            
             var pathes = new List<string>();
             var locations = new List<string>();
             var comments = new List<string>();
+            using XmlReader xmlReader = XmlReader.Create(App.GetResourceStream(new Uri("pack://application:,,,/BGMMetadata.xml")).Stream);
 
-            using (XmlReader xmlReader = XmlReader.Create(Application.GetResourceStream(new Uri("pack://application:,,,/BGMMetadata.xml")).Stream))
+            while (xmlReader.Read())
             {
-                while (xmlReader.Read())
+                if (xmlReader.Name == "BGM")
                 {
-                    if (xmlReader.Name == "BGM")
-                    {
-                        pathes.Add(xmlReader["path"]);
-                        locations.Add(xmlReader["loc."]);
-                        comments.Add(xmlReader["cmt"]);
-                    }
+                    pathes.Add(xmlReader["path"]);
+                    locations.Add(xmlReader["loc."]);
+                    comments.Add(xmlReader["cmt"]);
                 }
             }
+            
             await wzLoadingTask;
 
             var sortedBGMs = new List<string>();
@@ -172,6 +196,7 @@ namespace Rhythm_Maple_BGM_Player
         private void Stopped(object sender, NAudio.Wave.StoppedEventArgs e)
         {
             int index;
+
             if (PlayList.Items.Count == 0 || Math.Floor(Player.Position) != Player.Length)
                 return;
            if(!RepeatsAll)
@@ -248,10 +273,11 @@ namespace Rhythm_Maple_BGM_Player
 
 
             var path = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Wizet\MapleStory")?.GetValue("ExecPath") as string;
-
-            if (path[path.Length - 1] == '\\')
+            
+            if (path != null && path[path.Length - 1] == '\\')
                 path.Remove(path.Length - 1);
             await LoadAndDisplayBGMs(path);
+            progressBar.Visibility = Visibility.Hidden;
         }
 
 
@@ -282,7 +308,10 @@ namespace Rhythm_Maple_BGM_Player
         {
             if (e.LeftButton == MouseButtonState.Pressed && ((sender as ListView).SelectedItem as ListViewItem)?.Content is BGMListItem item)
             {
+                var selectedItem = playListListView.SelectedItem;
+
                 AddToPlayList(item);
+                playListListView.SelectedItem = selectedItem;
                 PlayMusic(item);
             }
         }
@@ -302,6 +331,7 @@ namespace Rhythm_Maple_BGM_Player
             totalLengthTextBlock.Text = length.ToString(@"mm\:ss");
         }
 
+        
 
         private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
         {
@@ -317,9 +347,9 @@ namespace Rhythm_Maple_BGM_Player
                     break;
                 case NAudio.Wave.PlaybackState.Paused:
                     playPauseIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Pause;
-                    Player.Resume();
+                    Player.Play();
                     break;
-                case null:
+               /* case null:
                     if (PlayList.Items.Count == 0)
                         MessageBox.Show("no bgms in the playlist");
                     int index = 0;
@@ -327,7 +357,7 @@ namespace Rhythm_Maple_BGM_Player
                         index = random.Next(PlayList.Items.Count);
                     playListListView.SelectedIndex = index;
                     PlayMusic(PlayList[index]);
-                    break;
+                    break;*/
             }
         }
 
@@ -337,6 +367,12 @@ namespace Rhythm_Maple_BGM_Player
 
             if ((sender as Button).Name == "previousButton")
             {
+                if(Player.Position > 4)
+                {
+                    Player.ResetPosition();
+                    return;
+                }
+
                 if (PlayList.CurrentIndex > 0)
                     index = --PlayList.CurrentIndex;
                 else
@@ -344,10 +380,16 @@ namespace Rhythm_Maple_BGM_Player
             }
             else
             {
-                if (PlayList.CurrentIndex < PlayList.Items.Count - 1)
-                    index = ++PlayList.CurrentIndex;
+                if (PlaysRandomly)
+                {
+                    do
+                    {
+                        index = random.Next(PlayList.Items.Count);
+                    } while (index == PlayList.CurrentIndex);
+                    PlayList.CurrentIndex = index;
+                }
                 else
-                    index = PlayList.CurrentIndex = 0;
+                    PlayList.CurrentIndex = index = (PlayList.CurrentIndex + 1) % PlayList.Items.Count;
             }  
             playListListView.SelectedIndex = index;
             PlayMusic(PlayList[index]);

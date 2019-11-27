@@ -50,7 +50,6 @@ namespace Wz
 
         public void Pause() => WavePlayer.Pause();
         public void Play() => WavePlayer.Play();
-        public void Resume() => WavePlayer.Resume();
         public void Stop() => WavePlayer.Stop();
         public void SetPlaybackStopped(EventHandler<StoppedEventArgs> handler) => WavePlayer.PlaybackStopped += handler;
 

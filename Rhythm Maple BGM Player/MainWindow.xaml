@@ -50,7 +50,7 @@
     </Window.Triggers>
 
     <Grid Background="LightSteelBlue">
-        
+
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
@@ -64,7 +64,7 @@
             <ColumnDefinition x:Name="collapsedGrid" Width="0"/>
         </Grid.ColumnDefinitions>
 
-        
+
         <TextBlock x:Name="titleBarTextBlock" Grid.Row="0" Grid.ColumnSpan="2" Margin="0, 0, 15, 0" Foreground="Navy" Text="Rhythm Maple BGM Player" VerticalAlignment="Center" TextAlignment="Center" FontSize="16"/>
         <materialDesign:PopupBox x:Name="menuPopupBox" Grid.Row="0" Grid.Column="0" PlacementMode="BottomAndAlignLeftEdges" StaysOpen="True" >
             <StackPanel Width="160">
@@ -90,9 +90,9 @@
                 </StackPanel>
             </materialDesign:PopupBox>
         </StackPanel>
-        
+
         <StackPanel Grid.Row="1" Grid.Column="0">
-            <ToggleButton Margin="4, 0" Foreground="Navy" HorizontalAlignment="Right" x:Name="menuToggleButton" Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
+            <ToggleButton Margin="4, 0" Foreground="Purple" HorizontalAlignment="Right" x:Name="menuToggleButton" Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
             <ListView x:Name="listView1" Height="310" ScrollViewer.HorizontalScrollBarVisibility="Auto" Foreground="Black" MouseDoubleClick="ListView1_MouseDoubleClick" KeyDown="ListView1_KeyDown">
                 <ListView.View>
                     <GridView>
@@ -111,7 +111,6 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1">
             <TextBlock Margin="40, 10" Text="플레이리스트" FontSize="13"/>
@@ -136,8 +135,8 @@
                 <TextBlock Margin="7, 7, 0, 0" x:Name="totalLengthTextBlock" Text="00:00" HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="42" RenderTransformOrigin="0.487,0.542" Foreground="ForestGreen"/>
             </StackPanel>
         </StackPanel>
-        <Button Grid.Row="2" Grid.Column="1" x:Name="removeFromPlayListButton" Padding="0" Width="35" Height="35" Margin="10, 3" Click="RemoveFromPlayListButton_Click"> 
-            <materialDesign:PackIcon Width="25" Height="25" Kind="PlaylistRemove"/>     
+        <Button Grid.Row="2" Grid.Column="1" x:Name="removeFromPlayListButton" Padding="0" Width="35" Height="35" Margin="10, 3" Click="RemoveFromPlayListButton_Click">
+            <materialDesign:PackIcon Width="25" Height="25" Kind="PlaylistRemove"/>
         </Button>
         <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
             <Button IsEnabled="False" Margin="10, 0, 5, 0" x:Name="previousButton" Height="35" Width="35" Style="{StaticResource MaterialDesignFloatingActionLightButton}" Click="PreviousOrNextButton_Click" >

@@ -8,16 +8,12 @@ namespace Rhythm_Maple_BGM_Player
     {
         public override Type TargetPropertyType
         {
-            get
-            {
-                return typeof(GridLength);
-            }
+            get => typeof(GridLength);
+            
         }
 
-        protected override System.Windows.Freezable CreateInstanceCore()
-        {
-            return new GridLengthAnimation();
-        }
+        protected override Freezable CreateInstanceCore() => new GridLengthAnimation();
+        
 
         public static readonly DependencyProperty FromProperty = DependencyProperty.Register("From", typeof(GridLength), typeof(GridLengthAnimation));
 

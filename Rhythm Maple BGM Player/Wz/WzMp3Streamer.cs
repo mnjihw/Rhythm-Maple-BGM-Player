@@ -12,14 +12,14 @@ namespace Wz
         private WzMp3Streamer() { }
         private static readonly Lazy<WzMp3Streamer> _instance = new Lazy<WzMp3Streamer>(() => new WzMp3Streamer());
         public static WzMp3Streamer Instance { get => _instance.Value; }
-        
+
 
         public float Volume
         {
             get => WavePlayer?.Volume ?? 0;
             set
             {
-                if (WavePlayer != null&& value >= 0 && value <= 1.0)
+                if (WavePlayer != null && value >= 0 && value <= 1.0)
                     WavePlayer.Volume = value;
                 else
                     new Exception("Volume value wrong");
@@ -52,6 +52,7 @@ namespace Wz
         public void Play() => WavePlayer.Play();
         public void Stop() => WavePlayer.Stop();
         public void SetPlaybackStopped(EventHandler<StoppedEventArgs> handler) => WavePlayer.PlaybackStopped += handler;
+          
 
         public void Open(WzSoundProperty sound)
         {
@@ -62,7 +63,7 @@ namespace Wz
             ByteStream = new MemoryStream(sound.GetBytes(false));
             MpegStream = new Mp3FileReader(ByteStream);
             WavePlayer = new WaveOut(WaveCallbackInfo.FunctionCallback());
-            WavePlayer.Init(MpegStream);
+            WavePlayer.Init(MpegStream);//fixme
             
             Volume = (float)(Application.Current.MainWindow as MainWindow).volumeSlider.Value;
         }
@@ -77,11 +78,8 @@ namespace Wz
                 MpegStream = null;
             }
         }
-        public void ResetPosition()
-        {
-            if(MpegStream != null)
-                MpegStream.Seek(0, SeekOrigin.Begin);
-        }
+        public void ResetPosition() => MpegStream?.Seek(0, SeekOrigin.Begin);
+        
         
        
     }

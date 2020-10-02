@@ -73,7 +73,7 @@ namespace Wz
         public string BaseDir { get; }
 
 
-        public void ExtractSoundFile()
+        public void ExtractSoundFile(WzInformationManager wzInformationManager)
         {
             foreach (WzImage soundImage in this["sound"].WzImages)
             {
@@ -84,7 +84,7 @@ namespace Wz
                 foreach (WzSoundProperty bgm in soundImage.WzProperties)
                 {
                     if(bgm.Name != "battleHorizonTheme" && bgm.Name != "Silence")
-                        MainWindow.InfoManager.BGMs[$@"{WzInfoTools.RemoveExtension(soundImage.Name)}/{bgm.Name}"] = bgm;
+                        wzInformationManager.BGMs[$@"{WzInfoTools.RemoveExtension(soundImage.Name)}/{bgm.Name}"] = bgm;
                 }
             }
         }

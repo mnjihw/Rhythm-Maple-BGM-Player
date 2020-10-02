@@ -39,7 +39,6 @@ namespace Rhythm_Maple_BGM_Player
         private Cursor MouseUpCursor { get; }
         private Cursor MouseHoverDownCursor { get; }
         private Cursor MouseHoverUpCursor { get; }
-        private bool IsCursorOverCommonControl { get; set; }
 
         private bool IsDragging { get; set; }
        
@@ -47,7 +46,10 @@ namespace Rhythm_Maple_BGM_Player
         {
             RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             InitializeComponent();
+            //Dispatcher.UnhandledException += (sender, e) => MessageBox.Show(e.Exception.ToString());
+
             Player = WzMp3Streamer.Instance;
+            
             PlayList.Items.CollectionChanged += (sender, e) =>
             {
                 switch((sender as ObservableCollection<BGMListItem>).Count)
@@ -78,7 +80,7 @@ namespace Rhythm_Maple_BGM_Player
 
 
         }
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern int MessageBoxTimeout(IntPtr hwnd, string text, string title, uint type, short languageId, int milliseconds);
         public void PlayFromBGMListItem(BGMListItem item)
         {
@@ -124,7 +126,7 @@ namespace Rhythm_Maple_BGM_Player
                 WzFileManager wzManager = new WzFileManager(path, MapleLib.WzLib.WzMapleVersion.BMS);
 
                 wzManager.LoadWzFile("sound");
-                wzManager.ExtractSoundFile();
+                wzManager.ExtractSoundFile(InfoManager);
             });
             
             var pathes = new List<string>();
@@ -211,11 +213,11 @@ namespace Rhythm_Maple_BGM_Player
                     do
                     {
                         index = random.Next(PlayList.Items.Count);
-                    } while (index == PlayList.CurrentIndex);
-                    PlayList.CurrentIndex = index;
+                    } while (index == PlayList.PlayingIndex);
+                    PlayList.PlayingIndex = index;
                 }
                 else
-                    PlayList.CurrentIndex = index = (PlayList.CurrentIndex + 1) % PlayList.Items.Count;
+                    PlayList.PlayingIndex = index = (PlayList.PlayingIndex + 1) % PlayList.Items.Count;
                 playListListView.SelectedIndex = index;
                 PlayMusic(PlayList[index]);
             }
@@ -320,8 +322,8 @@ namespace Rhythm_Maple_BGM_Player
         private void PlayMusic(BGMListItem item)
         {
             Player.Open(InfoManager.BGMs[item.Path]);
-            Player.SetPlaybackStopped(Stopped);
             Player.Play();
+            Player.SetPlaybackStopped(Stopped);
 
             playPauseIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Pause;
             playbackSlider.Value = 0;
@@ -335,12 +337,9 @@ namespace Rhythm_Maple_BGM_Player
 
         private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
         {
-            //playmusic으로 통합했는데 이부분 고치기
+
             switch (Player.PlaybackState)
             {
-                case NAudio.Wave.PlaybackState.Stopped:
-                    MessageBox.Show("^^^^");
-                    break;
                 case NAudio.Wave.PlaybackState.Playing:
                     playPauseIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Play;
                     Player.Pause();
@@ -349,15 +348,7 @@ namespace Rhythm_Maple_BGM_Player
                     playPauseIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Pause;
                     Player.Play();
                     break;
-               /* case null:
-                    if (PlayList.Items.Count == 0)
-                        MessageBox.Show("no bgms in the playlist");
-                    int index = 0;
-                    if(PlaysRandomly)
-                        index = random.Next(PlayList.Items.Count);
-                    playListListView.SelectedIndex = index;
-                    PlayMusic(PlayList[index]);
-                    break;*/
+
             }
         }
 
@@ -373,10 +364,10 @@ namespace Rhythm_Maple_BGM_Player
                     return;
                 }
 
-                if (PlayList.CurrentIndex > 0)
-                    index = --PlayList.CurrentIndex;
+                if (PlayList.PlayingIndex > 0)
+                    index = --PlayList.PlayingIndex;  //이부분 FIXME
                 else
-                    index = PlayList.CurrentIndex = PlayList.Items.Count - 1;
+                    index = PlayList.PlayingIndex = PlayList.Items.Count - 1;
             }
             else
             {
@@ -384,12 +375,12 @@ namespace Rhythm_Maple_BGM_Player
                 {
                     do
                     {
-                        index = random.Next(PlayList.Items.Count);
-                    } while (index == PlayList.CurrentIndex);
-                    PlayList.CurrentIndex = index;
+                        index = random.Next(PlayList.Items.Count); //여기서 랜덤 뽑을 거면 이거 보존해야 <<버튼 눌렀을 때 돌아갈 수 있음. Undo Redo
+                    } while (index == PlayList.PlayingIndex); 
+                    PlayList.PlayingIndex = index;
                 }
                 else
-                    PlayList.CurrentIndex = index = (PlayList.CurrentIndex + 1) % PlayList.Items.Count;
+                    PlayList.PlayingIndex = index = (PlayList.PlayingIndex + 1) % PlayList.Items.Count;
             }  
             playListListView.SelectedIndex = index;
             PlayMusic(PlayList[index]);
@@ -583,7 +574,7 @@ namespace Rhythm_Maple_BGM_Player
         {
             if ((sender as ListView).SelectedItem is BGMListItem item)
             {
-                PlayList.CurrentIndex = (sender as ListView).SelectedIndex;
+                PlayList.PlayingIndex = (sender as ListView).SelectedIndex;
                 PlayMusic(item);
             }
         }
@@ -716,11 +707,8 @@ namespace Rhythm_Maple_BGM_Player
                 if (listViewItem == null)
                     return;
 
-
-
                 if (DragDrop.DoDragDrop(listViewItem, new DataObject("BGMListItem", playListListView.Items.IndexOf(listViewItem.Content)), DragDropEffects.Move | DragDropEffects.Copy) == DragDropEffects.None)
                     Mouse.OverrideCursor = MouseUpCursor;
-
             }
         }
 
